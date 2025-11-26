@@ -1,5 +1,5 @@
 {
-  "name": "medilingua-live",
+  "name": "medconvo",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
+    "jspdf": "^3.0.4",
     "lucide-react": "^0.553.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

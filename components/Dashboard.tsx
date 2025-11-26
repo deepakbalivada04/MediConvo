@@ -11,7 +11,7 @@ interface DashboardProps {
   history: ConsultationRecord[];
   patients: Patient[];
   onViewConsultation: (id: string) => void;
-  // Assuming a function exists in the parent to handle the start of a new live session
+  // KEEPING this prop which was in the merged version (HEAD)
   onStartLiveSession: () => void; 
 }
 
@@ -59,28 +59,6 @@ const SimpleIntroGraphic: React.FC = () => (
     </div>
 );
 
-const NewSessionCTA: React.FC<{ onStart: () => void }> = ({ onStart }) => (
-    <div className="bg-white p-6 rounded-xl shadow-xl border border-[#EAEAEA] flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-        <div className="flex items-center">
-             <div className="w-12 h-12 rounded-full bg-[#C5A059]/20 flex items-center justify-center text-[#C5A059] mr-4">
-                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-             </div>
-             <div>
-                <h2 className="text-xl font-serif font-bold text-[#2D2D2D]">Initiate New Session</h2>
-                <p className="text-[#888] text-sm mt-1">Start a live, real-time medical interpretation session with a patient.</p>
-             </div>
-        </div>
-        
-        <button 
-          onClick={onStart} 
-          className="group relative flex items-center gap-3 px-6 py-3 bg-[#2D2D2D] hover:bg-[#C5A059] disabled:bg-stone-300 text-white rounded-lg font-semibold text-base shadow-md shadow-[#2D2D2D]/20 transition-all hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-4 focus:ring-[#C5A059]/30"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
-          Start Live Session
-        </button>
-    </div>
-);
-
 
 const Dashboard: React.FC<DashboardProps> = ({ stats, history, patients, onViewConsultation, onStartLiveSession }) => {
   const totalConsultationsForPie = stats.languageDistribution.reduce((sum, item) => sum + item.value, 0);
@@ -89,13 +67,13 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, history, patients, onViewC
     // Main background changed to Cream
     <div className="space-y-8 animate-fade-in pb-16 bg-[#F9F7F2] min-h-screen text-[#2D2D2D] font-sans">
       
-      {/* HEADER: Simplified header with status, removing explicit "MedConvo Dashboard" text */}
+      {/* HEADER: Premium Cream Look (Retained from HEAD, renamed header text to be specific) */}
       <header className="bg-white sticky top-0 z-10 shadow-lg px-8 pt-6 pb-4 border-b border-[#EAEAEA]">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div className="flex items-center">
             <SimpleIntroGraphic />
             <div>
-              <h1 className="text-2xl font-serif font-bold text-[#2D2D2D] tracking-tight ml-3">Dashboard</h1>
+              <h1 className="text-2xl font-serif font-bold text-[#2D2D2D] tracking-tight ml-3">MedConvo Dashboard</h1>
               <p className="text-[#888] mt-1 text-sm ml-3 uppercase tracking-widest">Analytics & Key Performance Indicators</p>
             </div>
           </div>
@@ -109,8 +87,9 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, history, patients, onViewC
       {/* Main Content Area */}
       <div className='px-8'>
         
-        {/* New Session Call to Action (CTA) */}
-        <NewSessionCTA onStart={onStartLiveSession} />
+        {/* The NewSessionCTA component has been removed from here. 
+            The 'Start Live Session' button in the App.tsx navigation bar
+            still works via the onStartLiveSession prop. */}
 
         {/* Stats Grid: Cream Theme */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
