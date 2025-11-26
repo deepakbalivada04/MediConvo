@@ -1,0 +1,7 @@
+{
+  "name": "MedConvo",
+  "description": "Real-time medical translation and consultation documentation system.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
