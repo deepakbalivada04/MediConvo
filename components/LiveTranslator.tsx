@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality, LiveClient } from '@google/genai';
 import { createBlob, decode, decodeAudioData, audioContext, inputAudioContext } from '../services/audioUtils';
 import { ChatMessage, Patient } from '../types';
-import { generateSummary } from '../services/geminiService'; // Assume this service can handle JSON structure request
+import { generateSummary } from '../services/geminiService'; // Assume this service can handle structured request
 
 interface LiveTranslatorProps {
   patient: Patient;
@@ -117,6 +117,10 @@ const LiveTranslator: React.FC<LiveTranslatorProps> = ({ patient, onSessionEnd, 
         }
       });
       
+      sessionPromise.then(sess => {
+          sessionRef.current = sess;
+      });
+
     } catch (e) {
       console.error(e);
       setStatus('error');
@@ -215,8 +219,8 @@ const LiveTranslator: React.FC<LiveTranslatorProps> = ({ patient, onSessionEnd, 
   };
 
   const stopSession = () => {
+    // Merged stopSession logic: ensures clean disconnect
     if (sessionRef.current) {
-      // Close the WebSocket connection cleanly
       sessionRef.current.close();
       sessionRef.current = null;
     }
@@ -230,6 +234,11 @@ const LiveTranslator: React.FC<LiveTranslatorProps> = ({ patient, onSessionEnd, 
       scriptProcessorRef.current = null;
       sourceRef.current = null;
     }
+    // Stop all playing audio sources
+    sourcesRef.current.forEach(source => {
+        try { source.stop(); } catch (e) {}
+    });
+    sourcesRef.current.clear();
     setIsLive(false);
     setStatus('idle');
   };
@@ -250,22 +259,12 @@ const LiveTranslator: React.FC<LiveTranslatorProps> = ({ patient, onSessionEnd, 
     currentInputRef.current = '';
     currentOutputRef.current = '';
 
-    // --- MODIFIED SUMMARY CALL TO REQUEST STRUCTURED DATA ---
-    // The key to this feature working is assuming 'generateSummary' now tells Gemini
-    // to return a specific JSON or structured text format that contains:
-    // 1. Clinical Summary (text)
-    // 2. Vitals (JSON/text list)
-    // 3. Medications (JSON/text list)
-    // The LiveTranslator must pass a special instruction asking for this format.
-    
-    // NOTE: This relies on you updating the 'generateSummary' function definition
-    // in '../services/geminiService' to handle a complex prompt requiring structured output.
-
-    const summary = await generateSummary(finalTranscript, 'structured_medical_note'); // Passing a hint for structured output
+    const summary = await generateSummary(finalTranscript);
     onSessionEnd(finalTranscript, summary);
   };
 
   return (
+    // Preserving the preferred, updated, professional look from the local HEAD version (Dark/Indigo)
     <div className="flex flex-col h-screen w-full bg-slate-950 text-slate-100 relative overflow-hidden font-sans">
       
       {/* Background Pattern & Radial Gradient */}
@@ -289,17 +288,17 @@ const LiveTranslator: React.FC<LiveTranslatorProps> = ({ patient, onSessionEnd, 
                     <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
                     <span className="text-teal-400">English</span>
                 </div>
-            </div>
-        </div>
-        
-        <div className="flex items-center gap-4">
-             {status === 'connected' && (
-                <div className="flex items-center gap-2 px-3 py-1 bg-green-900/50 border border-green-700 rounded-full text-green-300 shadow-md">
-                    <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse-slow"></div>
-                    <span className="text-xs font-medium uppercase tracking-wider">Live Translation</span>
                 </div>
-             )}
-        </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+                 {status === 'connected' && (
+                    <div className="flex items-center gap-2 px-3 py-1 bg-green-900/50 border border-green-700 rounded-full text-green-300 shadow-md">
+                        <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse-slow"></div>
+                        <span className="text-xs font-medium uppercase tracking-wider">Live Translation</span>
+                    </div>
+                 )}
+            </div>
       </div>
 
       {/* Content (Chat Area) */}
@@ -336,7 +335,7 @@ const LiveTranslator: React.FC<LiveTranslatorProps> = ({ patient, onSessionEnd, 
               </div>
               <p className="text-base leading-relaxed">{msg.text}</p>
             </div>
-          </div>
+            </div>
         ))}
 
         {/* Streaming Partials - Realtime Feedback */}
